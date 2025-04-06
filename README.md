@@ -60,7 +60,7 @@ main/
   Main training pipeline: loads data, applies BWO/LIBWO for learning rate optimization, trains and evaluates the model.
 
   **Model Training Process**  
-  After downloading and configuring all datasets correctly, ensure the runtime environment is properly set up. Then, update the dataset paths in the `ModelTrain.py` file to your local directories. Run the script to start the full training pipeline.
+  After downloading and configuring all datasets correctly, ensure the runtime environment is properly set up. Then, update the dataset paths in the `ModelTrain.py` file to your local directories. Run the script to start the full training pipeline.(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data())
 
   Initially, the LIBWO algorithm is called for hyperparameter tuning. Through iterative global search, LIBWO finds the optimal hyperparameter combinations and their corresponding fitness values.
 
