@@ -12,7 +12,10 @@ main/
 │   │   ├── cec2017_run/       # Main run logic and output results
 │   │   ├── BWO/               # Black Widow Optimization implementation
 │   │   └── LIBWO/             # Lagrange-Interpolated Black Widow Optimization
-│   └── cec2022/               # (Optional future support)
+│   └── cec2022/               # CEC2022 test suite (future support)
+│       ├── cec2022_run/       # Main run logic and output results for CEC2022
+│       ├── BWO/               # Black Widow Optimization implementation for CEC2022
+│       └── LIBWO/             # Lagrange-Interpolated Black Widow Optimization for CEC2022
 │
 ├── ResNet/                    # Deep learning optimization & training
 │   ├── model/                 # ResNet18 architecture
@@ -38,6 +41,15 @@ main/
 
 - [`cec/cec2017/LIBWO`](./cec/cec2017/LIBWO)  
   The core component of this project: **Lagrange Interpolation-enhanced Black Widow Optimization (LIBWO)** algorithm, boosting search ability and convergence.
+
+- [`cec/cec2022/cec2022_run`](./cec/cec2022/cec2022_run)  
+  Main execution module for CEC2022: runs CEC2022 test functions, evaluates baseline algorithms (e.g., BWO and LIBWO), and outputs results.
+
+- [`cec/cec2022/BWO`](./cec/cec2022/BWO)  
+  Source code for the **Black Widow Optimization (BWO)** algorithm applied to CEC2022 benchmark tasks.
+
+- [`cec/cec2022/LIBWO`](./cec/cec2022/LIBWO)  
+  The **Lagrange Interpolation-enhanced Black Widow Optimization (LIBWO)** algorithm applied to CEC2022. Enhances the BWO search process for CEC2022 benchmark functions.
 
 ### Deep Learning Optimization (`ResNet`)
 
