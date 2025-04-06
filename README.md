@@ -1,7 +1,74 @@
-Place LIBWO.py, model.py, and ModelTrain.py in the same folder. After correctly downloading and configuring all datasets, ensure that the runtime environment is properly set up. Modify the dataset paths in the ModelTrain.py file. Then, run the ModelTrain.py file to initiate the entire training process.
+# LIBWO
 
-First, invoke the LIBWO algorithm for hyperparameter tuning. Through multiple iterations, this algorithm intelligently searches for the global optimal solution, continuously optimizing the hyperparameters within the search space, and ultimately outputs the best hyperparameter combination and its corresponding fitness value.
+---
 
-Once LIBWO completes the optimization and generates the best hyperparameters, the system will automatically pass these parameters to the ResNet18 model. At this point, the model begins training, and the training process will continue until the model reaches convergence, ensuring optimal performance.
+## Project Structure
 
-Upon completion of the training, the system will conduct model testing, outputting key metrics such as test accuracy, test loss, and additional metrics including precision, recall, and F1-score. These metrics validate the performance of the ResNet18 model on the target task. This comprehensive workflow ensures efficient model training and evaluation, achieving optimal classification performance.
+```bash
+main/
+│
+├── cec/                       # Benchmark testing
+│   ├── cec2017/               # CEC2017 test suite
+│   │   ├── cec2017_run/       # Main execution logic and result output
+│   │   ├── BWO/               # Black Widow Optimization implementation
+│   │   └── LIBWO/             # Lagrange-Interpolated Black Widow Optimization
+│   └── cec2022/               # (Optional future support)
+│
+├── ResNet/                    # Deep learning optimization & training
+│   ├── model/                 # ResNet18 architecture
+│   ├── ModelTrain/            # Main training logic with LIBWO/BWO
+│   ├── BWO/                   # BWO for model hyperparameter tuning
+│   └── LIBWO/                 # LIBWO for hyperparameter tuning
+│
+└── videos/
+    └── cec_run.mp4            # Demo of CEC benchmark execution and result visualization
+```
+
+---
+
+## Module Description
+
+### Benchmark Optimization (`cec`)
+
+- [`cec/cec2017/cec2017_run`](./cec/cec2017/cec2017_run)  
+  Main execution module: calls CEC2017 test functions and evaluates baseline algorithms (such as BWO and LIBWO), outputs results.
+
+- [`cec/cec2017/BWO`](./cec/cec2017/BWO)  
+  Source code implementation of the BWO algorithm for benchmark optimization tasks.
+
+- [`cec/cec2017/LIBWO`](./cec/cec2017/LIBWO)  
+  Core of this project: **Lagrange-Interpolated Black Widow Optimization**, enhancing search ability and convergence.
+
+### Deep Learning Optimization (ResNet)
+
+- [`ResNet/model`](./ResNet/model)  
+  Definition of the ResNet18 model, built with TensorFlow/Keras.
+
+- [`ResNet/ModelTrain`](./ResNet/ModelTrain)  
+  Main training workflow: loads data, invokes BWO/LIBWO for learning rate optimization, trains and evaluates the model.
+
+- [`ResNet/BWO`](./ResNet/BWO)  
+  BWO algorithm used for tuning hyperparameters such as learning rate.
+
+- [`ResNet/LIBWO`](./ResNet/LIBWO)  
+  Improved BWO using Lagrange interpolation to optimize model performance.
+
+### Demo Video
+
+- [`videos/cec_run.mp4`](./videos/cec_run.mp4)  
+  Demonstrates the execution process and visualization of CEC benchmark test results.
+
+---
+
+## ⚙️ Environment Setup
+
+It is recommended to use [Anaconda](https://www.anaconda.com/) to manage the environment. This project is based on **Python 3.12**, with the following configuration:
+
+| Library         | Version     |
+|----------------|-------------|
+| Python          | 3.12        |
+| CUDA            | 11.2        |
+| cuDNN           | 8.2         |
+| TensorFlow-GPU  | 2.18        |
+| Keras           | 2.12        |
+| Scikit-learn    | 1.5.1       |
