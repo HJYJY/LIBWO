@@ -4,12 +4,12 @@
 
 ## Project Structure
 
-```bash
+```
 main/
 │
 ├── cec/                       # Benchmark testing
 │   ├── cec2017/               # CEC2017 test suite
-│   │   ├── cec2017_run/       # Main execution logic and result output
+│   │   ├── cec2017_run/       # Main run logic and output results
 │   │   ├── BWO/               # Black Widow Optimization implementation
 │   │   └── LIBWO/             # Lagrange-Interpolated Black Widow Optimization
 │   └── cec2022/               # (Optional future support)
@@ -17,52 +17,61 @@ main/
 ├── ResNet/                    # Deep learning optimization & training
 │   ├── model/                 # ResNet18 architecture
 │   ├── ModelTrain/            # Main training logic with LIBWO/BWO
-│   ├── BWO/                   # BWO for model hyperparameter tuning
-│   └── LIBWO/                 # LIBWO for hyperparameter tuning
+│   ├── BWO/                   # BWO applied to model hyperparameter tuning
+│   └── LIBWO/                 # LIBWO applied to hyperparameter tuning
 │
 └── videos/
-    └── cec_run.mp4            # Demo of CEC benchmark execution and result visualization
+    └── cec_run.mp4            # Demo of CEC benchmark test and output
 ```
 
 ---
 
-## Module Description
+## Module Descriptions
 
 ### Benchmark Optimization (`cec`)
 
 - [`cec/cec2017/cec2017_run`](./cec/cec2017/cec2017_run)  
-  Main execution module: calls CEC2017 test functions and evaluates baseline algorithms (such as BWO and LIBWO), outputs results.
+  Main execution module: runs CEC2017 test functions, evaluates baseline algorithms (e.g., BWO and LIBWO), and outputs results.
 
 - [`cec/cec2017/BWO`](./cec/cec2017/BWO)  
-  Source code implementation of the BWO algorithm for benchmark optimization tasks.
+  Source code for the **Black Widow Optimization (BWO)** algorithm used for benchmark tasks.
 
 - [`cec/cec2017/LIBWO`](./cec/cec2017/LIBWO)  
-  Core of this project: **Lagrange-Interpolated Black Widow Optimization**, enhancing search ability and convergence.
+  The core component of this project: **Lagrange Interpolation-enhanced Black Widow Optimization (LIBWO)** algorithm, boosting search ability and convergence.
 
-### Deep Learning Optimization (ResNet)
+### Deep Learning Optimization (`ResNet`)
 
 - [`ResNet/model`](./ResNet/model)  
-  Definition of the ResNet18 model, built with TensorFlow/Keras.
+  Definition of the **ResNet18** model, implemented using TensorFlow/Keras.
 
 - [`ResNet/ModelTrain`](./ResNet/ModelTrain)  
-  Main training workflow: loads data, invokes BWO/LIBWO for learning rate optimization, trains and evaluates the model.
+  Main training pipeline: loads data, applies BWO/LIBWO for learning rate optimization, trains and evaluates the model.
+
+  **Model Training Process**  
+  After downloading and configuring all datasets correctly, ensure the runtime environment is properly set up. Then, update the dataset paths in the `ModelTrain.py` file to your local directories. Run the script to start the full training pipeline.
+
+  Initially, the LIBWO algorithm is called for hyperparameter tuning. Through iterative global search, LIBWO finds the optimal hyperparameter combinations and their corresponding fitness values.
+
+  Once the optimal values are found, the system automatically applies them to the ResNet18 model, which then starts training until convergence is achieved—ensuring maximum performance.
+
+  After training, the system evaluates the model and outputs key metrics such as test accuracy, test loss, and additional indicators including precision, recall, and F1-score. This end-to-end workflow ensures efficient training and evaluation, resulting in optimal classification performance.
 
 - [`ResNet/BWO`](./ResNet/BWO)  
-  BWO algorithm used for tuning hyperparameters such as learning rate.
+  BWO algorithm applied to model hyperparameter tuning (e.g., learning rate).
 
 - [`ResNet/LIBWO`](./ResNet/LIBWO)  
-  Improved BWO using Lagrange interpolation to optimize model performance.
+  Enhanced BWO variant using Lagrange Interpolation to further improve model performance.
 
 ### Demo Video
 
 - [`videos/cec_run.mp4`](./videos/cec_run.mp4)  
-  Demonstrates the execution process and visualization of CEC benchmark test results.
+  Demonstrates the execution and result visualization of the CEC benchmark test functions.
 
 ---
 
-## ⚙️ Environment Setup
+## Environment Setup
 
-It is recommended to use [Anaconda](https://www.anaconda.com/) to manage the environment. This project is based on **Python 3.12**, with the following configuration:
+We recommend using [Anaconda](https://www.anaconda.com/) to manage your Python environment. This project is based on **Python 3.12** with the following recommended configuration:
 
 | Library         | Version     |
 |----------------|-------------|
