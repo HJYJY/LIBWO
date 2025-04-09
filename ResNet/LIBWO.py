@@ -43,47 +43,58 @@ class LIBWO:
         self.li_Score_best = 0
         self.li_Position_best = 0
 
-    # '''Initialize spider population''' Initialize the population step size
-
+        # Initialize the positions of individuals in the population
+    # Randomly generate initial solutions within the bounds
+    # for each dimension of each individual.
     def initial(self):
         X = np.zeros([self.pop, self.dim])
         for i in range(self.pop):
             for j in range(self.dim):
-                X[i, j] = random.random() * (self.ub[j] - self.lb[j]) + self.lb[j]  # Each dimension value is a random floating-point number
+                X[i, j] = random.random() * (self.ub[j] - self.lb[j]) + self.lb[j]  # Each dimension value is a random floating point number
 
         return X, self.lb, self.ub
 
-    '''Boundary check function'''
+    # Boundary check function
+    # Ensures that all individuals stay within the specified bounds
+    # after any position updates.
+    def BorderCheck(self, X):
+        for i in range(self.pop):
+            for j in range(self.dim):
+                if X[i, j] > self.ub[j]:
+                    X[i, j] = self.ub[j]
+                elif X[i, j] < self.lb[j]:
+                    X[i, j] = self.lb[j]
+        return X
 
-    def BorderCheck(self, x):
-        return np.clip(x, self.lb, self.ub)
-
-    '''Calculate fitness function'''
-
+    # Fitness evaluation function
+    # Applies the objective function to each individual
+    # and returns the corresponding fitness values.
     def CaculateFitness(self, X, fun):
         pop = X.shape[0]
         fitness = np.zeros([pop, 1])
         for i in range(pop):
-            fitness[i] = fun(self.model_param, X[i, :])  # Apply function fun to the i-th row of array X
+            fitness[i] = fun(self.model_param,X[i, :])         # Apply function fun to the i-th row of array X
         return fitness
 
-    '''Fitness sorting'''
-
+    # Fitness sorting function
+    # Sorts the fitness values in ascending order
+    # and returns the sorted values and corresponding indices.
     def SortFitness(self, Fit):
         fitness = np.sort(Fit, axis=0)
         index = np.argsort(Fit, axis=0)
         return fitness, index
 
-    '''Sort positions based on fitness'''
-
+    # Position sorting function
+    # Reorders the population positions based on the sorted fitness indices.
     def SortPosition(self, X, index):
         Xnew = np.zeros(X.shape)
         for i in range(X.shape[0]):
             Xnew[i, :] = X[index[i], :]
         return Xnew
 
-    '''Pheromone calculation'''
-
+    # Pheromone calculation function
+    # Calculates the pheromone intensity for each individual
+    # based on the difference between its fitness and the best/worst fitness values.
     def getPheromone(self, fit, minfit, maxfit, pop):
         out = np.zeros([pop])
         if minfit != maxfit:
@@ -91,8 +102,9 @@ class LIBWO:
                 out[i] = (maxfit - fit[i]) / (maxfit - minfit)
         return out
 
-    '''0/1 generator'''
-
+    # Binary 0/1 generator
+    # Simulates probabilistic events (e.g., crossover or mutation)
+    # by returning either 0 or 1 with equal probability.
     def getBinary(self):
         value = 0
         if np.random.random() < 0.5:
@@ -101,8 +113,30 @@ class LIBWO:
             value = 1
         return value
 
-    # Black widow
-
+    # Lagrange Interpolation-enhanced Black Widow Optimization Algorithm (LIBWO)
+    #
+    # This function enhances the original BWO algorithm by introducing a Lagrange interpolation mechanism
+    # to further improve search capability and convergence performance in high-dimensional optimization problems.
+    #
+    # The main steps of the algorithm are as follows:
+    # 1. Initialize the population and individual positions, calculate fitness, and record the initial global best;
+    # 2. In each iteration:
+    #    - Based on probability P, choose one of two spider movement update strategies;
+    #    - If the individual's pheromone level is low, trigger a "mating" mechanism to generate a new position;
+    #    - Perform boundary check on the new position and recalculate its fitness;
+    #    - If the new position is better, replace the old one;
+    # 3. At the end of each iteration:
+    #    - Use the best positions and fitness values from the current and previous generations
+    #      to perform Lagrange interpolation and predict a potentially better solution;
+    #    - If the interpolated position yields a better fitness, update it as the new global best;
+    #    - Update pheromone levels and record the best fitness of the current generation;
+    #    - Update the previous generation's best values for use in the next interpolation step.
+    #
+    # Returns:
+    # - GbestScore: the best fitness value found by the algorithm
+    # - GbestPosition: the solution vector corresponding to the best fitness
+    # - Curve: the best fitness value at each generation (can be used for plotting)
+    
     def LIBWO(self):
         global r2
         X, self.lb, self.ub = self.initial()  # Initialize population
@@ -151,20 +185,30 @@ class LIBWO:
             indexBest = np.argmin(fitness)
             indexWorst = np.argmax(fitness)
 
+            # At the end of each iteration, perform Lagrange interpolation to predict a potentially better solution.
+            # The steps are as follows:
+            # 1. Record the best position (now_iter_x_best) and best fitness (now_iter_y_best) of the current iteration;
+            # 2. Calculate the numerator and denominator of the Lagrange interpolation;
+            #    The numerator is calculated using the squared differences of the current and previous best positions and their corresponding fitness values;
+            # 3. To avoid division by zero, a small constant (1e-6) is used for smoothing in the denominator;
+            # 4. Calculate the interpolated best position (li_Position_best);
+            # 5. If the interpolated position does not have the correct dimension (not 20), adjust it to the correct dimension
+            #    and fill it with the current best position;
+            # 6. Calculate the fitness of the interpolated position (li_Score_best);
+            # 7. If the fitness of the interpolated position is better than the current best, update the best position and fitness;
+            # 8. If the current best fitness is better, update the global best fitness.
+            
             self.now_iter_x_best = copy.copy(X[indexBest, :])  # Best position of this iteration
             self.now_iter_y_best = copy.copy(fitness[indexBest])  # Best fitness of this iteration
 
             numerator = (np.square(self.now_iter_x_best) - np.square(GbestPositon)) * self.pre_iter_y_best + (
                     np.square(GbestPositon) - np.square(self.pre_iter_x_best)) * self.now_iter_y_best + (
                                 np.square(self.pre_iter_x_best) - np.square(self.now_iter_x_best)) * GbestScore
-            # Calculate the numerator
             denominator = 2 * ((self.now_iter_x_best - GbestPositon) * self.pre_iter_y_best + (
                     GbestPositon - self.pre_iter_x_best) * self.now_iter_y_best + (
                                        self.pre_iter_x_best - self.now_iter_x_best) * GbestScore)
-            # Handle zero elements in the denominator
             denominator = np.where(denominator == 0, 1e-6, denominator)
 
-            # Calculate the final result, Lagrange interpolation predicted position and its corresponding fitness value
             self.li_Position_best = numerator / denominator
             self.li_Position_best = copy.copy(fitness[indexBest])
             self.li_Score_best = fit_fun(self.model_param, self.li_Position_best)
