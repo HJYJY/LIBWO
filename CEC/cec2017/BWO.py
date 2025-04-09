@@ -8,7 +8,10 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 class BWO:
 
-    # Compute fitness value --- model_param
+    # Initialization function
+    # Sets the objective function for the optimization problem
+    # and initializes key BWO parameters such as population size,
+    # number of iterations, dimension, and variable bounds.
     def __init__(self, func, bwo_param, constraint_ueq=None):
         self.func = func
         # Initialize parameters
@@ -18,7 +21,9 @@ class BWO:
         self.lb = bwo_param['lb']
         self.ub = bwo_param['ub']
 
-    # Initialize spider population and steps
+    # Initialize the positions of individuals in the population
+    # Randomly generate initial solutions within the bounds
+    # for each dimension of each individual.
     def initial(self):
         X = np.zeros([self.pop, self.dim])
         for i in range(self.pop):
@@ -27,6 +32,8 @@ class BWO:
         return X, self.lb, self.ub
 
     # Boundary check function
+    # Ensures that all individuals stay within the specified bounds
+    # after any position updates.
     def BorderCheck(self, X):
         for i in range(self.pop):
             for j in range(self.dim):
@@ -36,7 +43,9 @@ class BWO:
                     X[i, j] = self.lb[j]
         return X
 
-    # Calculate fitness function
+    # Fitness evaluation function
+    # Applies the objective function to each individual
+    # and returns the corresponding fitness values.
     def CaculateFitness(self, X, fun):
         pop = X.shape[0]
         fitness = np.zeros([pop, 1])
@@ -44,20 +53,25 @@ class BWO:
             fitness[i] = self.func(X[i, :])  # Apply function to each row of X
         return fitness
 
-    # Sort fitness values
+    # Fitness sorting function
+    # Sorts the fitness values in ascending order
+    # and returns the sorted values and corresponding indices.
     def SortFitness(self, Fit):
         fitness = np.sort(Fit, axis=0)
         index = np.argsort(Fit, axis=0)
         return fitness, index
 
-    # Sort positions based on fitness
+    # Position sorting function
+    # Reorders the population positions based on the sorted fitness indices.
     def SortPosition(self, X, index):
         Xnew = np.zeros(X.shape)
         for i in range(X.shape[0]):
             Xnew[i, :] = X[index[i], :]
         return Xnew
 
-    # Compute pheromone levels
+    # Pheromone calculation function
+    # Calculates the pheromone intensity for each individual
+    # based on the difference between its fitness and the best/worst fitness values.
     def getPheromone(self, fit, minfit, maxfit, pop):
         out = np.zeros([pop])
         if minfit != maxfit:
@@ -66,6 +80,8 @@ class BWO:
         return out
 
     # Binary 0/1 generator
+    # Simulates probabilistic events (e.g., crossover or mutation)
+    # by returning either 0 or 1 with equal probability.
     def getBinary(self):
         value = 0
         if np.random.random() < 0.5:
@@ -74,8 +90,28 @@ class BWO:
             value = 1
         return value
 
-    # Black Widow Optimization algorithm core
-    def BWO(self):
+    # Black Widow Optimization algorithm core # Core function of the Black Widow Optimization (BWO) algorithm
+    # This function implements the main optimization process of BWO, including:
+    # individual position updates, fitness evaluations, pheromone updates,
+    # and tracking of the global best solution.
+    #
+    # The algorithm flow is as follows:
+    # 1. Initialize positions of individuals in the population;
+    # 2. Calculate initial fitness values and pheromones;
+    # 3. In each iteration, update positions based on probability:
+    #    - If random probability P >= 0.3: update toward global best using cosine-based movement;
+    #    - Else: move toward global best based on a randomly selected individual;
+    #    - If pheromone level is too low, trigger "mating" mechanism to generate a new individual;
+    # 4. Perform boundary check and re-evaluate the fitness of the new position;
+    # 5. If the new position is better than the old, replace it;
+    # 6. Update the global best solution and pheromone levels;
+    # 7. Record the best fitness value for each generation.
+    #
+    # Returns:
+    # - GbestScore: Best (lowest) global fitness value
+    # - GbestPosition: Position corresponding to the best fitness
+    # - Curve: Evolution curve of the best fitness over iterations
+        def BWO(self):
         global r2
         X, self.lb, self.ub = self.initial()  # Initialize population
         # fitness = self.CaculateFitness(X, fit_fun(self.model_param, X))  # Compute fitness values
@@ -112,7 +148,6 @@ class BWO:
                             band = 0
                     Xnew[i, :] = GbestPositon + (X[r1, :] - (-1) ** self.getBinary() * X[r2, :]) / 2
 
-                # Boundary check
                 for j in range(self.dim):
                     if Xnew[i, j] > self.ub[j]:
                         Xnew[i, j] = self.ub[j]
